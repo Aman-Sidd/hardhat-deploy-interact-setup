@@ -1,0 +1,39 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-b6d7d4e1d79e357526515dbf87da1459c62e8a57",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "userSourceNameMap": {
+    "contracts/TodoList.sol": "project/contracts/TodoList.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/TodoList.sol": {
+        "content": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.0;\r\n\r\ncontract TodoList {\r\n    struct Todo {\r\n        string title;\r\n        string description;\r\n    }\r\n\r\n    string[] titles;\r\n    string[] descriptions;\r\n    mapping(address => mapping(uint => Todo)) internal addressToTodos;\r\n    mapping(address => uint[]) internal addressToTodoIds;\r\n    mapping(address => mapping(uint => bool)) internal exists;\r\n\r\n    function addToDo(\r\n        uint _todoId,\r\n        string memory _title,\r\n        string memory _description\r\n    ) public {\r\n        address userAddress = msg.sender;\r\n        if (exists[userAddress][_todoId]) {\r\n            return;\r\n        }\r\n        Todo memory newTodo = Todo(_title, _description);\r\n        addressToTodoIds[userAddress].push(_todoId);\r\n        addressToTodos[userAddress][_todoId] = newTodo;\r\n        exists[userAddress][_todoId] = true;\r\n    }\r\n\r\n    function getTodoWithId(uint _todoId) public view returns (Todo memory) {\r\n        address userAddress = msg.sender;\r\n        require(\r\n            exists[userAddress][_todoId],\r\n            \"No Todo Found with the given Todo ID\"\r\n        );\r\n        Todo memory todo = addressToTodos[userAddress][_todoId];\r\n        return todo;\r\n    }\r\n\r\n    function getAllTodos()\r\n        public\r\n        view\r\n        returns (uint[] memory, string[] memory, string[] memory)\r\n    {\r\n        address userAddress = msg.sender;\r\n        uint[] memory todoIds = addressToTodoIds[userAddress];\r\n\r\n        string[] memory _titles = new string[](todoIds.length);\r\n        string[] memory _descriptions = new string[](todoIds.length);\r\n\r\n        for (uint i = 0; i < todoIds.length; i++) {\r\n            Todo memory todo = addressToTodos[userAddress][todoIds[i]];\r\n            _titles[i] = todo.title;\r\n            _descriptions[i] = todo.description;\r\n        }\r\n\r\n        return (todoIds, _titles, _descriptions);\r\n    }\r\n\r\n    function removeTodoId(uint _todoId) internal returns (bool) {\r\n        address userAddress = msg.sender;\r\n        uint[] storage todoIds = addressToTodoIds[userAddress];\r\n        bool todoFound = false;\r\n        for (uint i = 0; i < todoIds.length - 1; i++) {\r\n            if (todoIds[i] == _todoId || todoFound) {\r\n                todoFound = true;\r\n                todoIds[i] = todoIds[i + 1];\r\n            } else {\r\n                continue;\r\n            }\r\n        }\r\n        if (todoIds[todoIds.length - 1] == _todoId) {\r\n            todoIds.pop();\r\n            todoFound = true;\r\n        }\r\n        return todoFound;\r\n    }\r\n\r\n    function removeTodo(uint _todoId) public {\r\n        address userAddress = msg.sender;\r\n        require(\r\n            exists[userAddress][_todoId],\r\n            \"No Todo Found with the given Todo ID\"\r\n        );\r\n        delete addressToTodos[userAddress][_todoId];\r\n        removeTodoId(_todoId);\r\n    }\r\n}\r\n"
+      }
+    }
+  }
+}
