@@ -1,21 +1,46 @@
-import { network } from "hardhat";
+import hre, { network } from "hardhat";
+import { verifyContract } from "@nomicfoundation/hardhat-verify/verify";
+
 
 const { ethers, networkName } = await network.connect();
 
-console.log(`Deploying TodoList to ${networkName}...`);
 
-const todoList = await ethers.deployContract("TodoList");
+async function main() {
 
-console.log("Waiting for the deployment tx to confirm");
-await todoList.waitForDeployment();
+    console.log(`Deploying TodoList to ${networkName}...`);
 
-console.log("TodoList address:", await todoList.getAddress());
+    const todoList = await ethers.deployContract("TodoList");
 
-const tx = await todoList.addToDo(1, "GREET", "GOOD MORNING");
+    console.log("Waiting for the deployment tx to confirm");
+    await todoList.waitForDeployment();
 
-// console.log("Calling todoList add fn");
-await tx.wait();
-console.log("Tx:", tx);
-// console.log("Waiting for the addTodo tx to confirm");
+    const contractAddress = await todoList.getAddress();
+    try{
+        await verifyContract({
+            address: contractAddress,
+            constructorArgs:[],
+            provider:"etherscan"
+        }, hre)
+        console.log("Successfully verified")
+    } catch(e){
+        console.log(e);
+    }
+        
+    console.log("TodoList address:", await todoList.getAddress());
 
-console.log("Deployment successful!");
+    const tx = await todoList.addToDo(1, "GREET", "GOOD MORNING");
+
+    await tx.wait();
+    console.log("Tx:", tx);
+
+    console.log("Deployment successful!");
+}
+
+
+
+main()
+    .then(() => process.exit(0))
+    .catch((e) => {
+        console.log(e);
+        process.exit(1);
+    })

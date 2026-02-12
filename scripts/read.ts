@@ -5,11 +5,14 @@ const { ethers, networkName } = await network.connect();
 const signers = await ethers.getSigners();
 console.log("SIGNER:", signers);
 console.log("NETWORK NAME:", networkName);
-const todoList = await ethers.getContractAt("TodoList", "0x6312815af3CD29ACc4EE4F2FB8DE5C28F12F63Cf");
+// const TodoListFactory = await ethers.getContractFactory("TodoList");
+// const todoList = await TodoListFactory.deploy();
 
-// const tx = await todoList.addToDo(2, "GREET 2", "GOOD NIGHT BRO!");
-// await tx.wait();
-// console.log("Tx successful:", tx)
+const todoList = await ethers.getContractAt("TodoList", "0x5FbDB2315678afecb367f032d93F642f64180aa3");
+
+const tx = await todoList.addToDo(2, "GREET 2", "GOOD NIGHT BRO!");
+await tx.wait();
+console.log("Tx successful:", tx)
 
 const value = await todoList.getTodoWithId(2)
 
