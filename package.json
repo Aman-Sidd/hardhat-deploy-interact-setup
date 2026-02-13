@@ -22,5 +22,8 @@
     "hardhat": "^3.1.7",
     "mocha": "^11.7.5",
     "typescript": "~5.8.0"
+  },
+  "dependencies": {
+    "solhint": "^6.0.3"
   }
 }
